@@ -115,7 +115,6 @@ app.post("/usuarios", async (req, res) => {
   let client
 
   try {
-    console.log("Obteniendo conexión de la pool...")
     client = await pool.connect()
 
     await client.query("BEGIN")
@@ -167,7 +166,7 @@ app.post("/usuarios", async (req, res) => {
     }
 
     const escolaridadId = escResult.rows[0].id
-    console.log("🎓Escolaridad encontrada con ID:", escolaridadId)
+    console.log("Escolaridad encontrada con ID:", escolaridadId)
 
     // Verificar CURP duplicada
     const existeUsuario = await client.query(`SELECT id FROM usuarios WHERE curp = $1`, [curp.trim()])
@@ -200,7 +199,7 @@ app.post("/usuarios", async (req, res) => {
 
     // Insertar habilidades si existen
     if (Array.isArray(habilidades) && habilidades.length > 0) {
-      console.log("🛠️ Procesando habilidades:", habilidades)
+      console.log("Procesando habilidades:", habilidades)
 
       for (const habilidad of habilidades) {
         if (habilidad && habilidad.trim()) {
