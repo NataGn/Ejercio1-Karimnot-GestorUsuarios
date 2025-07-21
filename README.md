@@ -101,9 +101,7 @@ npm start
 Abre en el navegador:
 http://localhost:3000
 
-Credenciales administrador:
-Correo: admin@test.com
-Contraseña: admin123
+Registrate como nuevo usuario y regresas a iniciar sesion con el correo y contraseña agregado
 
 ---
 
