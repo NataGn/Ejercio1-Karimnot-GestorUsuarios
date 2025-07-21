@@ -1,38 +1,367 @@
-.App {
+/* App.css */
+body {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #f7f9fc 0%, #e3eaf7 100%);
+  margin: 0;
+  padding: 0;
+  color: #202124;
+}
+
+.container {
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2.5rem 3rem;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.15), 0 8px 24px rgba(26, 115, 232, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.container:hover {
+  box-shadow: 0 6px 20px rgba(26, 115, 232, 0.3), 0 12px 36px rgba(26, 115, 232, 0.15);
+}
+
+.title {
   text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a73e8;
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.form-group {
+  margin-bottom: 1.5rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: #3c4043;
+  user-select: none;
 }
 
-.App-header {
-  background-color: #282c34;
+.input,
+select,
+input[type="file"] {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1.5px solid #dadce0;
+  border-radius: 12px;
+  outline: none;
+  background-color: #fff;
+  box-shadow: inset 0 1px 3px rgb(60 64 67 / 0.1);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-weight: 500;
+  color: #202124;
+  box-sizing: border-box;
+}
+
+.input::placeholder,
+select::placeholder {
+  color: #a8a8a8;
+  font-weight: 400;
+}
+
+.input:focus,
+select:focus,
+input[type="file"]:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 8px rgba(26, 115, 232, 0.3);
+  background-color: #f9fbff;
+}
+
+.error-input {
+  border-color: #d93025 !important;
+  box-shadow: 0 0 8px rgba(217, 48, 37, 0.3) !important;
+}
+
+.error {
+  color: #d93025;
+  font-size: 13px;
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 12px 22px;
+  background-color: #1a73e8;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(26, 115, 232, 0.4);
+  transition: background-color 0.3s, box-shadow 0.3s;
+  user-select: none;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #155ab6;
+  box-shadow: 0 6px 20px rgba(21, 90, 182, 0.5);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.preview-image {
+  margin-top: 12px;
+  max-width: 160px;
+  max-height: 160px;
+  border-radius: 16px;
+  border: 1.5px solid #dadce0;
+  box-shadow: 0 2px 6px rgb(60 64 67 / 0.1);
+  object-fit: cover;
+  display: block;
+}
+
+.habilidades-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.habilidades-container .input {
+  flex: 1;
+  margin-top: 0;
+}
+
+.habilidades-container .button {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.habilidades-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.habilidades-list li {
+  background-color: #e8f0fe;
+  color: #1967d2;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  user-select: none;
+  box-shadow: 0 1px 3px rgb(25 103 210 / 0.2);
+  transition: background-color 0.3s;
+}
+
+.habilidades-list li:hover {
+  background-color: #c2d4fc;
+}
+
+.date-picker,
+.react-datepicker-wrapper {
+  width: 100%;
+  font-size: 15px;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #dadce0;
+  outline: none;
+  font-weight: 500;
+  transition: border-color 0.3s ease;
+  color: #202124;
+  box-sizing: border-box;
+}
+
+.react-datepicker__input-container input:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 8px rgba(26, 115, 232, 0.3);
+  background-color: #f9fbff;
+}
+
+.usuarios-list {
+  list-style: none;
+  padding: 0;
+}
+
+.usuario-card {
+  background-color: #ffffff;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.usuario-foto {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+
+/* Contenedor principal */
+.auth-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  background: white;
+}
+
+/* Títulos */
+.auth-container h2 {
+  color: #202124;
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 24px;
+}
+
+/* Inputs */
+.auth-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.auth-container input:focus {
+  border-color: #1a73e8;
+  outline: none;
+}
+
+/* Botones */
+.auth-container button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  margin-top: 16px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-container button[type="submit"]:hover {
+  background-color: #0d5bba;
+}
+
+/* Enlace para cambiar entre login/registro */
+.auth-change {
+  margin-top: 16px;
+  color: #5f6368;
+}
+
+.auth-change span {
+  color: #1a73e8;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.auth-change span:hover {
+  color: #0d5bba;
+}
+
+/* Mensajes */
+.auth-message {
+  margin-top: 1rem;
+  font-weight: 600;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.auth-message.error {
+  color: #d93025;
+  background-color: #fce8e6;
+}
+
+.auth-message.success {
+  color: #188038;
+  background-color: #e6f4ea;
+}
+
+/* Estilos para la aplicación principal */
+.app-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7f9fc 0%, #e3eaf7 100%);
+}
+
+.app-auth-container {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  background: linear-gradient(135deg, #f7f9fc 0%, #e3eaf7 100%);
+}
+
+.app-header {
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.app-header-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #dadce0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.app-header-button:hover {
+  background: #f8f9fa;
+}
+
+.app-header-button.active {
+  background: #1a73e8;
   color: white;
+  border-color: #1a73e8;
 }
 
-.App-link {
-  color: #61dafb;
+.app-header-button.logout {
+  margin-left: auto;
+  background: #d93025;
+  color: white;
+  border-color: #d93025;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app-header-button.logout:hover {
+  background: #b52d20;
+}
+
+.app-main {
+  padding: 2rem;
+}
+
+small {
+  color: #666;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
 }
