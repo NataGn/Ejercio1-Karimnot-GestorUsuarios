@@ -168,13 +168,16 @@ function EditarUsuario({ usuario, onClose, onUsuarioActualizado }) {
   const subirFotoAS3 = useCallback(async () => {
     if (!form.foto) return form.fotoUrl // Mantener la foto existente si no se cambió
 
-    console.log("📸 Subiendo nueva foto a S3...")
+    console.log("Subiendo nueva foto a S3...")
     const formData = new FormData()
     formData.append("foto", form.foto)
 
     try {
       const res = await fetch("http://localhost:3001/subir-foto", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: formData,
       })
 
@@ -203,7 +206,7 @@ function EditarUsuario({ usuario, onClose, onUsuarioActualizado }) {
     async (e) => {
       e.preventDefault()
 
-      console.log(" Iniciando actualización del usuario...")
+      console.log("Iniciando actualización del usuario...")
 
       if (!validar()) {
         alert("Por favor corrige los errores en el formulario")
@@ -233,12 +236,13 @@ function EditarUsuario({ usuario, onClose, onUsuarioActualizado }) {
           edad: edadCalculada,
         }
 
-        console.log(" Enviando datos actualizados al servidor:", datosFinales)
+        console.log("Enviando datos actualizados al servidor:", datosFinales)
 
         const res = await fetch(`http://localhost:3001/usuarios/${usuario.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify(datosFinales),
         })
@@ -246,8 +250,8 @@ function EditarUsuario({ usuario, onClose, onUsuarioActualizado }) {
         const data = await res.json()
 
         if (res.ok) {
-          alert(" Usuario actualizado exitosamente!")
-          console.log(" Usuario actualizado:", data)
+          alert("Usuario actualizado exitosamente!")
+          console.log("Usuario actualizado:", data)
 
           // Notificar al componente padre que el usuario fue actualizado
           if (onUsuarioActualizado) {

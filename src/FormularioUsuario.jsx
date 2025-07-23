@@ -139,33 +139,39 @@ function FormularioUsuario() {
   const subirFotoAS3 = useCallback(async () => {
     if (!form.foto) return null
 
-    console.log(" Subiendo foto a S3...")
+    console.log("Subiendo foto...")
     const formData = new FormData()
     formData.append("foto", form.foto)
 
     try {
+      const token = localStorage.getItem("token")
       const res = await fetch("http://localhost:3001/subir-foto", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       })
 
       if (!res.ok) {
-        console.log(" Error en subida de foto, continuando sin imagen")
+        console.log("Error en subida de foto:", res.status, res.statusText)
+        const errorData = await res.json().catch(() => ({}))
+        console.log("Error data:", errorData)
         return null
       }
 
       const data = await res.json()
+      console.log("Respuesta del servidor:", data)
 
       if (data.url) {
-        console.log(" Foto subida exitosamente:", data.url)
+        console.log("Foto subida exitosamente:", data.url)
         return data.url
       } else {
-        console.log(" Foto procesada pero sin URL (S3 no configurado)")
+        console.log("Respuesta sin URL")
         return null
       }
     } catch (error) {
-      console.error(" Error al subir foto:", error)
-      console.log(" Continuando sin foto...")
+      console.error("Error al subir foto:", error)
       return null
     }
   }, [form.foto])
@@ -174,7 +180,7 @@ function FormularioUsuario() {
     async (e) => {
       e.preventDefault()
 
-      console.log(" Iniciando envío del formulario...")
+      console.log("Iniciando envío del formulario...")
 
       if (!validar()) {
         alert("Por favor corrige los errores en el formulario")
@@ -186,11 +192,9 @@ function FormularioUsuario() {
 
         let fotoUrl = null
         if (form.foto) {
+          console.log("Intentando subir foto...")
           fotoUrl = await subirFotoAS3()
-          if (!fotoUrl) {
-            // Mostrar advertencia pero continuar
-            console.log(" No se pudo subir la foto, guardando usuario sin imagen")
-          }
+          console.log("Resultado de subida de foto:", fotoUrl)
         }
 
         // Calcular edad
@@ -211,12 +215,13 @@ function FormularioUsuario() {
           edad: edadCalculada,
         }
 
-        console.log(" Enviando datos al servidor:", datosFinales)
+        console.log("Enviando datos al servidor:", datosFinales)
 
         const res = await fetch("http://localhost:3001/usuarios", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify(datosFinales),
         })
@@ -225,11 +230,13 @@ function FormularioUsuario() {
 
         if (res.ok) {
           const mensaje = fotoUrl
-            ? " Usuario guardado exitosamente con foto!"
-            : " Usuario guardado exitosamente (sin foto)!"
+            ? "Usuario guardado exitosamente con foto!"
+            : form.foto
+              ? "Usuario guardado exitosamente, pero hubo un problema con la foto"
+              : "Usuario guardado exitosamente!"
 
           alert(mensaje)
-          console.log(" Usuario creado:", data)
+          console.log("Usuario creado:", data)
 
           // Limpiar formulario
           setForm({
@@ -254,11 +261,11 @@ function FormularioUsuario() {
           const fileInput = document.querySelector('input[type="file"]')
           if (fileInput) fileInput.value = ""
         } else {
-          console.error(" Error del servidor:", data)
+          console.error("Error del servidor:", data)
           alert(`Error: ${data.error || "Error desconocido"}`)
         }
       } catch (err) {
-        console.error(" Error de conexión:", err)
+        console.error("Error de conexión:", err)
         alert(`Error de conexión: ${err.message}`)
       } finally {
         setSubiendo(false)

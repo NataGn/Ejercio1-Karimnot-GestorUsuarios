@@ -3,19 +3,50 @@
 import { useEffect, useState } from "react"
 import EditarUsuario from "./EditarUsuario"
 
-const UsuariosList = () => {
+const UsuariosList = ({ usuario }) => {
   const [usuarios, setUsuarios] = useState([])
   const [busqueda, setBusqueda] = useState("")
   const [filtroEscolaridad, setFiltroEscolaridad] = useState("")
   const [editandoUsuario, setEditandoUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)
 
+  // Verificar permisos
+  const tienePermiso = (permiso) => {
+    if (!usuario) return false
+    if (usuario.rol === "administrador") return true
+    return usuario.permisos && usuario.permisos.includes(permiso)
+  }
+
   const cargarUsuarios = async () => {
     try {
       setCargando(true)
-      const response = await fetch("http://localhost:3001/usuarios")
-      const data = await response.json()
-      setUsuarios(data)
+      const token = localStorage.getItem("token")
+      if (!token) {
+        alert("No hay token de autenticación. Por favor inicia sesión nuevamente.")
+        return
+      }
+
+      const response = await fetch("http://localhost:3001/usuarios", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (response.status === 401) {
+        alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.")
+        localStorage.removeItem("token")
+        localStorage.removeItem("usuario")
+        window.location.reload()
+        return
+      }
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log("Usuarios cargados:", data)
+        setUsuarios(data)
+      } else {
+        console.error("Error al cargar usuarios:", response.status)
+      }
     } catch (err) {
       console.error("Error al obtener usuarios:", err)
       alert("Error al cargar usuarios")
@@ -28,19 +59,23 @@ const UsuariosList = () => {
     cargarUsuarios()
   }, [])
 
-  const usuariosFiltrados = usuarios.filter((usuario) => {
+  const usuariosFiltrados = usuarios.filter((u) => {
     const coincideBusqueda =
-      usuario.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      usuario.apellidos.toLowerCase().includes(busqueda.toLowerCase()) ||
-      usuario.curp.toLowerCase().includes(busqueda.toLowerCase())
+      u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      u.apellidos.toLowerCase().includes(busqueda.toLowerCase()) ||
+      u.curp.toLowerCase().includes(busqueda.toLowerCase())
 
-    const coincideEscolaridad = !filtroEscolaridad || usuario.escolaridad === filtroEscolaridad
+    const coincideEscolaridad = !filtroEscolaridad || u.escolaridad === filtroEscolaridad
 
     return coincideBusqueda && coincideEscolaridad
   })
 
-  const handleEditarUsuario = (usuario) => {
-    setEditandoUsuario(usuario)
+  const handleEditarUsuario = (u) => {
+    if (!tienePermiso("usuarios.editar")) {
+      alert("No tienes permisos para editar usuarios")
+      return
+    }
+    setEditandoUsuario(u)
   }
 
   const handleCerrarEdicion = () => {
@@ -48,20 +83,33 @@ const UsuariosList = () => {
   }
 
   const handleUsuarioActualizado = () => {
-    // Recargar la lista de usuarios después de actualizar
     cargarUsuarios()
   }
 
   const eliminarUsuario = async (id, nombre) => {
+    if (!tienePermiso("usuarios.eliminar")) {
+      alert("No tienes permisos para eliminar usuarios")
+      return
+    }
+
     if (window.confirm(`¿Estás seguro de que quieres eliminar al usuario ${nombre}?`)) {
       try {
+        const token = localStorage.getItem("token")
         const response = await fetch(`http://localhost:3001/usuarios/${id}`, {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
+
+        if (response.status === 403) {
+          alert("No tienes permisos para eliminar usuarios")
+          return
+        }
 
         if (response.ok) {
           alert("Usuario eliminado exitosamente")
-          cargarUsuarios() // Recargar la lista
+          cargarUsuarios()
         } else {
           const error = await response.json()
           alert(`Error al eliminar usuario: ${error.error}`)
@@ -71,6 +119,17 @@ const UsuariosList = () => {
         alert("Error de conexión al eliminar usuario")
       }
     }
+  }
+
+  // Función para manejar errores de carga de imagen
+  const handleImageError = (e) => {
+    console.log("Error cargando imagen:", e.target.src)
+    e.target.src = "/placeholder.svg?height=80&width=80"
+  }
+
+  // Función para verificar si la imagen se carga correctamente
+  const handleImageLoad = (e) => {
+    console.log("Imagen cargada correctamente:", e.target.src)
   }
 
   if (cargando) {
@@ -83,7 +142,14 @@ const UsuariosList = () => {
 
   return (
     <div className="container">
-      <h2 className="title">Lista de Usuarios ({usuarios.length})</h2>
+      <div className="header-with-role">
+        <h2 className="title">Lista de Usuarios ({usuarios.length})</h2>
+        <div className="role-indicator">
+          <span className={`role-badge ${usuario.rol}`}>
+            {usuario.rol === "administrador" ? "Administrador" : "Usuario Estándar"}
+          </span>
+        </div>
+      </div>
 
       <div className="filtros-container" style={{ marginBottom: "2rem" }}>
         <input
@@ -119,8 +185,10 @@ const UsuariosList = () => {
               <div className="usuario-foto-container">
                 <img
                   src={u.fotografia || "/placeholder.svg?height=80&width=80&query=usuario"}
-                  alt={u.nombre}
+                  alt={`Foto de ${u.nombre}`}
                   className="usuario-foto"
+                  onError={handleImageError}
+                  onLoad={handleImageLoad}
                 />
               </div>
 
@@ -144,15 +212,23 @@ const UsuariosList = () => {
               </div>
 
               <div className="usuario-acciones">
-                <button onClick={() => handleEditarUsuario(u)} className="button button-edit">
-                   Editar
-                </button>
-                <button
-                  onClick={() => eliminarUsuario(u.id, `${u.nombre} ${u.apellidos}`)}
-                  className="button button-delete"
-                >
-                   Eliminar
-                </button>
+                {/* Mostrar botones solo si tiene permisos */}
+                {tienePermiso("usuarios.editar") && (
+                  <button onClick={() => handleEditarUsuario(u)} className="button button-edit">
+                    Editar
+                  </button>
+                )}
+                {tienePermiso("usuarios.eliminar") && (
+                  <button
+                    onClick={() => eliminarUsuario(u.id, `${u.nombre} ${u.apellidos}`)}
+                    className="button button-delete"
+                  >
+                    Eliminar
+                  </button>
+                )}
+                {!tienePermiso("usuarios.editar") && !tienePermiso("usuarios.eliminar") && (
+                  <span className="no-actions">Solo lectura</span>
+                )}
               </div>
             </div>
           ))}
