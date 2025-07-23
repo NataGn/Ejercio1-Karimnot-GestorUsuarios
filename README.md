@@ -1,8 +1,11 @@
 # Sistema de Gestión de Usuarios
 
-Sistema de información web para gestionar un listado de usuarios, con autenticación de administrador, validación de direcciones, subida de imágenes a Amazon S3 y base de datos PostgreSQL.
-
----
+Sistema web completo para gestión de usuarios con las siguientes características:
+- **Frontend**: React.js con interfaz moderna
+- **Backend**: Node.js con Express
+- **Base de datos**: PostgreSQL
+- **Autenticación**: JWT con roles y permisos
+- **Funcionalidades**: CRUD de usuarios, gestión de permisos, subida de fotos
 
 Variables de Entorno (.env)
 
@@ -10,10 +13,9 @@ El backend usa variables de entorno para configurar conexión, JWT, AWS, etc.
 
 # Cómo usar el `.env`
 
-1. En la carpeta `backend-usuarios` hay un archivo llamado `.env.example` que es una plantilla.  
+1. En la carpeta `backend-usuarios` hay un archivo llamado `.env.ejemplo` que es una plantilla.  
    Copia ese archivo para crear tu `.env` real:
 
-   ```bash
    cp backend-usuarios/.env.example backend-usuarios/.env
 
 
@@ -35,80 +37,87 @@ El backend usa variables de entorno para configurar conexión, JWT, AWS, etc.
 
 ---
 
-# Configurar la Base de Datos
 
-1. Abre la consola psql:
-   - Windows: busca "SQL Shell (psql)"
-   - Mac/Linux: abre terminal y ejecuta:
-     psql postgres
+## CONFIGURAR BASE DE DATOS
 
-2. Crea la base de datos y conéctate:
+1. Abre consola psql:
+   - Windows: "SQL Shell (psql)"
+   - Linux/macOS: `psql postgres`
+
+2. Crear base de datos y conectarte:
    CREATE DATABASE usuariosdb;
    \c usuariosdb
 
-3. Ejecuta el script para crear tablas y datos iniciales:
+3. Ejecutar el script `bd-completo.sql`:
+   \i backend-usuarios/scripts/bd-completo.sql
 
-   -- Tablas y datos iniciales (escolaridades, administradores, habilidades, usuarios, usuario_habilidades)
-   -- + función y trigger para actualizar fecha_actualizacion
-   -- + admin por defecto con contraseña en hash bcrypt (admin123)
-
-   -- (Aquí pegar el script completo que tienes para crear las tablas)
-
-4. Verifica las tablas creadas:
+4. Verificar tablas creadas:
    \dt
 
-5. Sal del cliente psql:
+5. Salir:
    \q
 
----
 
-# Instalar Dependencias
+##  CONFIGURAR BACKEND
 
-1. Clona el repositorio y entra en la carpeta:
-   git clone git@github.com:NataGn/Sistema-de-Gesti-n-de-Usuarios.git
-   cd Sistema-de-Gesti-n-de-Usuarios
-
-2. Instala las dependencias del frontend:
-   npm install
-
-3. Instala las dependencias del backend:
+1. Entra a la carpeta del backend:
    cd backend-usuarios
+
+2. Instala dependencias:
    npm install
-   cd ..
 
-4. Crea y configura tu archivo .env basado en .env.example
+3. Configura `.env` basado en `.env.ejemplo`:
 
----
+DB_HOST=localhost
+DB_USER=usuario_app
+DB_PASS=tu_password_seguro
+DB_NAME=usuariosdb
+DB_PORT=5432
+JWT_SECRET=clave_secreta_segura
+PORT=3001
 
-# Ejecutar la Aplicación
+AWS_REGION=us-east-2
+AWS_ACCESS_KEY_ID=***
+AWS_SECRET_ACCESS_KEY=***
+AWS_BUCKET_NAME=***
 
-Opción automática (Linux/macOS):
-chmod +x scripts/start-everything.sh
-./scripts/start-everything.sh
-
-Opción manual:
-Terminal 1 (Backend):
-cd backend-usuarios
-node index.js
-
-Terminal 2 (Frontend):
-npm start
-
----
-
-# Acceso
-
-Abre en el navegador:
-http://localhost:3000
-
-Registrate como nuevo usuario y regresas a iniciar sesion con el correo y contraseña agregado
+4. Inicia backend:
+   npm run dev
 
 ---
 
-# Problemas comunes
+##  CONFIGURAR FRONTEND
 
-- Verifica que PostgreSQL esté corriendo y las credenciales .env sean correctas.
-- Si el puerto 3000 está ocupado, cambia el puerto o cierra la app que lo usa.
-- npm o psql no reconocidos: revisa instalación y variables PATH.
+1. En carpeta raíz del proyecto:
+   npm install
+
+2. Iniciar frontend:
+   npm start
 
 ---
+
+##  ACCESO Y PRUEBAS
+
+1. Abre navegador:
+   http://localhost:3000
+
+2. Regístrate como administrador
+
+3. Inicia sesión con tus datos
+
+4. Prueba:
+   - Crear usuarios con CURP, foto y habilidades
+   - Editar, eliminar
+   - Gestionar permisos
+
+
+## PROBLEMAS COMUNES
+
+- PostgreSQL no arranca → `sudo systemctl status postgresql`
+- `.env` incorrecto → revisar credenciales
+- Puertos ocupados → cambia en `.env` o `package.json`
+- "bcrypt not found" → `npm install bcrypt`
+
+
+
+
