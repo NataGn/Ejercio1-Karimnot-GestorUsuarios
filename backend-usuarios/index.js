@@ -102,7 +102,6 @@ app.use((req, res, next) => {
   next()
 })
 
-// ==================== RUTAS PÚBLICAS ====================
 
 // Test de conexión a la base de datos
 app.get("/test-db", async (req, res) => {
@@ -440,7 +439,6 @@ app.delete("/admin/usuarios/:id", verificarToken, soloAdministrador, async (req,
   }
 })
 
-// ==================== RUTAS PROTEGIDAS ====================
 
 // Obtener información del usuario actual
 app.get("/me", verificarToken, async (req, res) => {

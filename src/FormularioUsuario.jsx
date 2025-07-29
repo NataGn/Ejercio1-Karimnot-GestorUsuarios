@@ -344,6 +344,7 @@ function FormularioUsuario() {
             maxDate={MAX_DATE}
             className={`input ${errores.fechaNacimiento ? "error-input" : ""}`}
             wrapperClassName="react-datepicker-wrapper"
+            readOnly={true}
           />
           {errores.fechaNacimiento && <p className="error">{errores.fechaNacimiento}</p>}
         </div>

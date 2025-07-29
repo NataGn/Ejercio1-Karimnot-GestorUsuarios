@@ -106,7 +106,7 @@ const RegistroInicial = ({ onRegistroExitoso }) => {
         </button>
       </form>
 
-      {mensaje && <div className={`auth-message ${mensaje.includes("✅") ? "success" : "error"}`}>{mensaje}</div>}
+      {mensaje && <div className={`auth-message ${mensaje.includes("") ? "success" : "error"}`}>{mensaje}</div>}
 
       <div style={{ marginTop: "1rem", padding: "1rem", backgroundColor: "#f8f9fa", borderRadius: "8px" }}>
         <h4 style={{ margin: "0 0 0.5rem 0", color: "#1a73e8" }}>Este administrador podrá:</h4>

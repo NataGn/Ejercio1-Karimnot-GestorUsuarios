@@ -9,6 +9,7 @@ const UsuariosList = ({ usuario }) => {
   const [filtroEscolaridad, setFiltroEscolaridad] = useState("")
   const [editandoUsuario, setEditandoUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)
+  const [ordenamiento, setOrdenamiento] = useState({ campo: null, direccion: "asc" })
 
   // Verificar permisos
   const tienePermiso = (permiso) => {
@@ -59,16 +60,68 @@ const UsuariosList = ({ usuario }) => {
     cargarUsuarios()
   }, [])
 
-  const usuariosFiltrados = usuarios.filter((u) => {
-    const coincideBusqueda =
-      u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      u.apellidos.toLowerCase().includes(busqueda.toLowerCase()) ||
-      u.curp.toLowerCase().includes(busqueda.toLowerCase())
+  // Función para ordenar usuarios
+  const ordenarUsuarios = (campo) => {
+    const nuevaDireccion = ordenamiento.campo === campo && ordenamiento.direccion === "asc" ? "desc" : "asc"
+    setOrdenamiento({ campo, direccion: nuevaDireccion })
+  }
 
-    const coincideEscolaridad = !filtroEscolaridad || u.escolaridad === filtroEscolaridad
+  // Aplicar filtros y ordenamiento
+  const usuariosProcesados = usuarios
+    .filter((u) => {
+      const coincideBusqueda =
+        u.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+        u.apellidos.toLowerCase().includes(busqueda.toLowerCase()) ||
+        u.curp.toLowerCase().includes(busqueda.toLowerCase())
 
-    return coincideBusqueda && coincideEscolaridad
-  })
+      const coincideEscolaridad = !filtroEscolaridad || u.escolaridad === filtroEscolaridad
+
+      return coincideBusqueda && coincideEscolaridad
+    })
+    .sort((a, b) => {
+      if (!ordenamiento.campo) return 0
+
+      let valorA, valorB
+
+      switch (ordenamiento.campo) {
+        case "numero":
+          valorA = a.id
+          valorB = b.id
+          break
+        case "curp":
+          valorA = a.curp
+          valorB = b.curp
+          break
+        case "nombre":
+          valorA = `${a.nombre} ${a.apellidos}`
+          valorB = `${b.nombre} ${b.apellidos}`
+          break
+        case "fecha":
+          valorA = new Date(a.fecha_nacimiento)
+          valorB = new Date(b.fecha_nacimiento)
+          break
+        case "escolaridad":
+          // Orden específico para escolaridad
+          const ordenEscolaridad = { Primaria: 1, Secundaria: 2, Preparatoria: 3, Universidad: 4 }
+          valorA = ordenEscolaridad[a.escolaridad] || 0
+          valorB = ordenEscolaridad[b.escolaridad] || 0
+          break
+        case "direccion":
+          valorA = a.direccion
+          valorB = b.direccion
+          break
+        case "habilidades":
+          valorA = a.habilidades && a.habilidades.length > 0 ? a.habilidades.join(", ") : ""
+          valorB = b.habilidades && b.habilidades.length > 0 ? b.habilidades.join(", ") : ""
+          break
+        default:
+          return 0
+      }
+
+      if (valorA < valorB) return ordenamiento.direccion === "asc" ? -1 : 1
+      if (valorA > valorB) return ordenamiento.direccion === "asc" ? 1 : -1
+      return 0
+    })
 
   const handleEditarUsuario = (u) => {
     if (!tienePermiso("usuarios.editar")) {
@@ -121,27 +174,31 @@ const UsuariosList = ({ usuario }) => {
     }
   }
 
-  // Función para manejar errores de carga de imagen
   const handleImageError = (e) => {
     console.log("Error cargando imagen:", e.target.src)
     e.target.src = "/placeholder.svg?height=80&width=80"
   }
 
-  // Función para verificar si la imagen se carga correctamente
   const handleImageLoad = (e) => {
     console.log("Imagen cargada correctamente:", e.target.src)
   }
 
+  // Función para obtener el icono de ordenamiento
+  const getIconoOrdenamiento = (campo) => {
+    if (ordenamiento.campo !== campo) return "↕"
+    return ordenamiento.direccion === "asc" ? "" : ""
+  }
+
   if (cargando) {
     return (
-      <div className="container">
+      <div className="container-full">
         <div className="loading">Cargando usuarios...</div>
       </div>
     )
   }
 
   return (
-    <div className="container">
+    <div className="container-full">
       <div className="header-with-role">
         <h2 className="title">Lista de Usuarios ({usuarios.length})</h2>
         <div className="role-indicator">
@@ -170,7 +227,7 @@ const UsuariosList = ({ usuario }) => {
         </select>
       </div>
 
-      {usuariosFiltrados.length === 0 ? (
+      {usuariosProcesados.length === 0 ? (
         <div className="no-results">
           {busqueda || filtroEscolaridad ? (
             <p>No se encontraron usuarios que coincidan con los filtros.</p>
@@ -179,63 +236,106 @@ const UsuariosList = ({ usuario }) => {
           )}
         </div>
       ) : (
-        <div className="usuarios-grid">
-          {usuariosFiltrados.map((u) => (
-            <div key={u.id} className="usuario-card">
-              <div className="usuario-foto-container">
-                <img
-                  src={u.fotografia || "/placeholder.svg?height=80&width=80&query=usuario"}
-                  alt={`Foto de ${u.nombre}`}
-                  className="usuario-foto"
-                  onError={handleImageError}
-                  onLoad={handleImageLoad}
-                />
-              </div>
-
-              <div className="usuario-info">
-                <h3 className="usuario-nombre">
-                  {u.nombre} {u.apellidos}
-                </h3>
-                <p className="usuario-detalle">
-                  <strong>CURP:</strong> {u.curp}
-                </p>
-                <p className="usuario-detalle">
-                  <strong>Dirección:</strong> {u.direccion}
-                </p>
-                <p className="usuario-detalle">
-                  <strong>Escolaridad:</strong> {u.escolaridad}
-                </p>
-                <p className="usuario-detalle">
-                  <strong>Habilidades:</strong>{" "}
-                  {u.habilidades && u.habilidades.length > 0 ? u.habilidades.join(", ") : "Sin habilidades"}
-                </p>
-              </div>
-
-              <div className="usuario-acciones">
-                {/* Mostrar botones solo si tiene permisos */}
-                {tienePermiso("usuarios.editar") && (
-                  <button onClick={() => handleEditarUsuario(u)} className="button button-edit">
-                    Editar
-                  </button>
-                )}
-                {tienePermiso("usuarios.eliminar") && (
-                  <button
-                    onClick={() => eliminarUsuario(u.id, `${u.nombre} ${u.apellidos}`)}
-                    className="button button-delete"
+        <div className="tabla-container">
+          <table className="usuarios-tabla">
+            <thead>
+              <tr>
+                <th className="th-ordenable" onClick={() => ordenarUsuarios("numero")} title="Ordenar por número">
+                  # {getIconoOrdenamiento("numero")}
+                </th>
+                <th>Foto</th>
+                <th className="th-ordenable" onClick={() => ordenarUsuarios("curp")} title="Ordenar por CURP">
+                  CURP {getIconoOrdenamiento("curp")}
+                </th>
+                <th className="th-ordenable" onClick={() => ordenarUsuarios("nombre")} title="Ordenar por nombre">
+                  Nombre Completo {getIconoOrdenamiento("nombre")}
+                </th>
+                <th
+                  className="th-ordenable"
+                  onClick={() => ordenarUsuarios("fecha")}
+                  title="Ordenar por fecha de nacimiento"
+                >
+                  Fecha Nacimiento {getIconoOrdenamiento("fecha")}
+                </th>
+                <th
+                  className="th-ordenable"
+                  onClick={() => ordenarUsuarios("escolaridad")}
+                  title="Ordenar por escolaridad"
+                >
+                  Escolaridad {getIconoOrdenamiento("escolaridad")}
+                </th>
+                <th className="th-ordenable" onClick={() => ordenarUsuarios("direccion")} title="Ordenar por dirección">
+                  Dirección {getIconoOrdenamiento("direccion")}
+                </th>
+                <th
+                  className="th-ordenable"
+                  onClick={() => ordenarUsuarios("habilidades")}
+                  title="Ordenar por habilidades"
+                >
+                  Habilidades {getIconoOrdenamiento("habilidades")}
+                </th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuariosProcesados.map((u, index) => (
+                <tr key={u.id}>
+                  <td className="numero-cell">{index + 1}</td>
+                  <td>
+                    <img
+                      src={u.fotografia || "/placeholder.svg?height=50&width=50&query=usuario"}
+                      alt={`Foto de ${u.nombre}`}
+                      className="tabla-foto"
+                      onError={handleImageError}
+                      onLoad={handleImageLoad}
+                    />
+                  </td>
+                  <td className="curp-cell">{u.curp}</td>
+                  <td className="nombre-cell">
+                    {u.nombre} {u.apellidos}
+                  </td>
+                  <td>{new Date(u.fecha_nacimiento).toLocaleDateString("es-ES")}</td>
+                  <td>
+                    <span className={`escolaridad-badge escolaridad-${u.escolaridad?.toLowerCase()}`}>
+                      {u.escolaridad}
+                    </span>
+                  </td>
+                  <td className="direccion-cell" title={u.direccion}>
+                    {u.direccion}
+                  </td>
+                  <td
+                    className="habilidades-cell"
+                    title={u.habilidades && u.habilidades.length > 0 ? u.habilidades.join(", ") : "Sin habilidades"}
                   >
-                    Eliminar
-                  </button>
-                )}
-                {!tienePermiso("usuarios.editar") && !tienePermiso("usuarios.eliminar") && (
-                  <span className="no-actions">Solo lectura</span>
-                )}
-              </div>
-            </div>
-          ))}
+                    {u.habilidades && u.habilidades.length > 0 ? u.habilidades.join(", ") : "Sin habilidades"}
+                  </td>
+                  <td>
+                    <div className="acciones-tabla">
+                      {tienePermiso("usuarios.editar") && (
+                        <button onClick={() => handleEditarUsuario(u)} className="button button-edit tabla-btn">
+                          Editar
+                        </button>
+                      )}
+                      {tienePermiso("usuarios.eliminar") && (
+                        <button
+                          onClick={() => eliminarUsuario(u.id, `${u.nombre} ${u.apellidos}`)}
+                          className="button button-delete tabla-btn"
+                        >
+                          Eliminar
+                        </button>
+                      )}
+                      {!tienePermiso("usuarios.editar") && !tienePermiso("usuarios.eliminar") && (
+                        <span className="no-actions">Solo lectura</span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Modal de edición */}
       {editandoUsuario && (
         <EditarUsuario
           usuario={editandoUsuario}
